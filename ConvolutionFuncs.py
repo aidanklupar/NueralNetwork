@@ -117,11 +117,43 @@ def Conv_matmul(A_prev, W, b, h_params):
 
     return Z, cache
 
-def dConv_matmul(dZ, cache):
-    dA = None
-    dW = None
-    db = None
-    return dA, dW, db
+def dConv_matmul(dJdZ, cache):
+    A_prev, W, b, h_params = cache
+
+    m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
+    f, f, n_C_prev, n_C = W.shape
+
+    stride = h_params['stride']
+    pad = h_params['pad']
+
+    pad = checkPad(pad, stride, f, n_W_prev)
+
+    n_H = int( ( n_H_prev - f + 2*pad ) / stride ) + 1
+    n_W = int( ( n_W_prev - f + 2*pad ) / stride ) + 1
+
+    Z = np.zeros((m, n_H, n_W, n_C))
+
+    A_prev_pad = zeroPad(A_prev, pad)
+    dJdZ = dJdZ.reshape(m, n_H*n_W, n_C)
+
+    dA_prev = np.zeros((m, n_H_prev, n_W_prev, n_C_prev))
+    dW = np.zeros((f,f, n_C_prev, n_C))
+    db = np.zeros((1, 1, 1, n_C))
+    for i in range(m):
+        
+        a_mat = np.zeros((n_H*n_W, f**2*n_C_prev))
+        W_col = np.zeros((f**2*n_C_prev, n_C))
+        for c in range(n_C_prev):
+            a_prev_pad = np.squeeze(A_prev_pad[i, :, :, c])
+            a_mat_c = im2col(a_prev_pad, f, stride).transpose()  
+            a_mat[:, f**2*c:f**2*(c+1)] = a_mat_c
+            W_col[f**2*c:f**2*(c+1), :] = W[:, :, c, :].reshape(f**2, n_C)
+
+            dA_prev[i, :, :, c] = np.sum((dJdZ[i, :, :] @ W_col.transpose()), axis=1).reshape(n_H_prev, n_W_prev)
+        dW[:,:,:,:] = (a_mat.transpose() @ dJdZ[i, :, :]).reshape(f,f,n_C_prev, n_C)
+        db = np.sum(dJdZ[i, :, :], axis=0)
+    
+    return dA_prev, dW, db
 
 def im2col(A, f, stride):
     m,n = A.shape

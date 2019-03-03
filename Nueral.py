@@ -90,7 +90,11 @@ class Network:
         all_close = np.allclose(Grad_act, dW)
         print( 'All Close: ',  all_close)
         print( 'Max Error: ', max( abs(Grad_act - dW).flatten() ) )
+        print(Grad_act)
         print()
+        print(dW)
+        print()
+
 
     def train(self, maxIter=10, display=False, plot=False, saveRate=50):
         print('-----Training-----')

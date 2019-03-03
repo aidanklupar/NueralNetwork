@@ -131,7 +131,7 @@ class Conv():
 
     def backprop(self, dJdA):
         dJdZ = dJdA * self.dAdZ
-        dJdA_prev, dJdW, dJdb = ConvF.dConv(dJdZ, self.cache)
+        dJdA_prev, dJdW, dJdb = ConvF.dConv_matmul(dJdZ, self.cache)
 
         return dJdA_prev, dJdW, dJdb
 
