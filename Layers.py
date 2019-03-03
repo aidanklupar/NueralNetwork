@@ -124,7 +124,7 @@ class Conv():
         self.b = W0[self.f**2*self.n_C_prev*self.n_C:].reshape(1, 1, 1, self.n_C)
 
     def prop(self, A_prev):
-        Z, self.cache = ConvF.Conv(A_prev, self.W, self.b, self.h_params)
+        Z, self.cache = ConvF.Conv_matmul(A_prev, self.W, self.b, self.h_params)
         A, self.dAdZ = self.activation(Z)
 
         return A

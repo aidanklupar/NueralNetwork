@@ -1,5 +1,8 @@
 import numpy as np
 
+#TODO
+# Whats up when there's no padding?
+
 def Conv_slice( As, W, b):
     Z = np.dot(As.flatten(), W.flatten()) + b
     #Z = np.sum(np.multiply(As, W), axis=None) + b
@@ -96,14 +99,17 @@ def Conv_matmul(A_prev, W, b, h_params):
     A_prev_pad = zeroPad(A_prev, pad)
 
     for i in range(m):
-        for c in range(1):
-            a_prev_pad = np.squeeze(A_prev_pad[i, :, :, :])
-            a_mat = im2col(a_prev_pad, f, stride).transpose()
-            #W_col = W[:, :, c, :].reshape(n_C, -1).transpose()
-            W_col = W[:, :, c, :].reshape(-1, n_C)
+        
+        a_mat = np.zeros((n_H*n_W, f**2*n_C_prev))
+        W_col = np.zeros((f**2*n_C_prev, n_C))
+        for c in range(n_C_prev):
+            a_prev_pad = np.squeeze(A_prev_pad[i, :, :, c])
+            a_mat_c = im2col(a_prev_pad, f, stride).transpose()  
+            a_mat[:, f**2*c:f**2*(c+1)] = a_mat_c
+            W_col[f**2*c:f**2*(c+1), :] = W[:, :, c, :].reshape(f**2, n_C)
 
-            Z_col = (a_mat @ W_col) #+ np.squeeze(b[:, :, :, :])
-            Z[i, :, :, :] = Z_col.reshape(n_H, n_W, n_C)
+        Z_col = (a_mat @ W_col) 
+        Z[i, :, :, :] = Z_col.reshape(1, n_H, n_W, n_C) + np.squeeze(b[:, :, :, :])
     
     cache = (A_prev, W, b, h_params)
 
