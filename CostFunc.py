@@ -2,7 +2,7 @@ import numpy as np
 import collections
 import functools
 import LossFuncs as LF
-from Layers import Dense, Conv, Stack, Flatten
+from Layers import Dense, Conv, Stack, Flatten, Pool
 
 def CostFunc(W0, layers, A, y, Loss):
     num_layers = len( layers )
@@ -32,7 +32,7 @@ def CostFunc(W0, layers, A, y, Loss):
             dJdA_prev, Grad = layers[i].backprop(dJdA)
             dJdA = dJdA_prev
             GradList.append( Grad )
-        elif isinstance( layers[i], Flatten):
+        elif isinstance( layers[i], (Flatten, Pool)):
             dJdA_prev = layers[i].backprop(dJdA)
             dJdA = dJdA_prev
 
