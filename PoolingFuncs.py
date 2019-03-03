@@ -42,7 +42,7 @@ def dPool(dA, cache, mode='max'):
     m, n_H_prev, n_W_prev, n_C_prev = A_prev.shape
     m, n_H, n_W, n_C = dA.shape
 
-    dA_prev = np.zeros(dA.shape)
+    dA_prev = np.zeros(A_prev.shape)
 
     for i in range(m):
         a_prev = A_prev[i, :, :, :]
@@ -54,16 +54,18 @@ def dPool(dA, cache, mode='max'):
                     h0 = w*stride
                     hf = h0 + f
 
-                    if mode == 'max':
+                    if mode == "max":
                         a_prev_slice = a_prev[v0:vf, h0:hf, c]
                         mask = create_mask(a_prev_slice)
-                        dA_prev[i, v0:vf, h0:hf, c] += mask
-
-                    elif mode == 'avg':
-                        da = a_prev(i, h, w, c)
-                        shape = da.shape
-                        dA_prev[i, v0:vf, h0:hf, c] += distribute_value(da, shape)
+                        dA_prev[i, v0:vf, h0:hf, c] += mask * dA[i, h, w, c]
+                        
+                    elif mode == "average":
+                        a = dA[i, h, w, c]
+                        shape = (f, f)
+                        dA_prev[i, v0:vf, h0:hf, c] += distribute_value(a, shape)
     
+    assert(dA_prev.shape == A_prev.shape)
+
     return dA_prev
 
 def create_mask(x):
