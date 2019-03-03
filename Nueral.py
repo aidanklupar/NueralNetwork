@@ -55,9 +55,12 @@ class Network:
                 print('Layer', i, '|', layerType, ' Layer |', outputShape , '| Num Weights:', layer.getNumWeights() )
                 inputShape = outputShape
             except ValueError:
-                print('[-] Input/Output shape mismatch.')
+                print('[-] Input/Output shape mismatch for layer ', i)
                 break
         
+        if (outputShape != self.y.shape):
+            print('[-] Output shape does not match y shape')
+
         print('Total Num Weights: ', self.W0.size)
 
     def setLoss(self, func):
