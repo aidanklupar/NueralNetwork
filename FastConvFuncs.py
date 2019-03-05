@@ -44,9 +44,7 @@ def dConv(dJdZ, cache):
 
     m, n_H, n_W, n_C = dJdZ.shape
 
-    #dA_prev = np.zeros([m, n_H_prev, n_W_prev, n_C_prev])
     dW = np.zeros([f, f, n_C_prev, n_C])
-    #db = np.zeros([1, 1, 1, n_C])
 
     A_prev_pad = zeroPad(A_prev, pad)
 
